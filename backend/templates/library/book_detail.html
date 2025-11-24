@@ -117,11 +117,11 @@
                                     {% endif %}
 
                                     {% if not has_reservation and book.is_available %}
-                                        <a href="{% url 'library:reserve_book' book.id %}" class="btn btn-outline-warning btn-lg">
+                                        <a href="{% url 'library:reserve_book' book.id %}" class="btn btn-warning btn-lg">
                                             <i class="fas fa-bookmark me-2"></i>Reserve Book
                                         </a>
                                     {% elif has_reservation %}
-                                        <button class="btn btn-outline-secondary btn-lg" disabled>
+                                        <button class="btn btn-secondary btn-lg" disabled>
                                             <i class="fas fa-bookmark me-2"></i>Already Reserved
                                         </button>
                                     {% endif %}
@@ -131,7 +131,7 @@
                                     </a>
                                 {% endif %}
                                 
-                                <a href="{% url 'library:book_list' %}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{% url 'library:book_list' %}" class="btn btn-secondary btn-lg">
                                     <i class="fas fa-arrow-left me-2"></i>Back to Books
                                 </a>
                             </div>
