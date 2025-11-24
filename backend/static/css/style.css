@@ -38,6 +38,9 @@
     
     /* Transitions */
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Layout */
+    --navbar-height: 88px;
 }
 
 /* Global Styles */
@@ -56,6 +59,7 @@ body {
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    padding-top: var(--navbar-height); /* offset fixed navbar height */
 }
 
 /* Enhanced Navigation */
@@ -65,6 +69,11 @@ body {
     padding: 1rem 0;
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999; /* ensure navbar and dropdowns sit above page content */
 }
 
 .navbar-brand {
@@ -119,6 +128,15 @@ body {
     padding: 0.5rem;
     margin-top: 0.5rem;
     background: white;
+    pointer-events: auto;
+    z-index: 10000 !important;
+}
+
+.navbar-nav .dropdown-menu,
+.navbar .dropdown-menu {
+    position: absolute !important;
+    z-index: 10000 !important;
+    min-width: 12rem;
 }
 
 .dropdown-item {
@@ -126,6 +144,8 @@ body {
     padding: 0.6rem 1rem;
     transition: var(--transition);
     font-weight: 500;
+    position: relative;
+    z-index: 10001;
 }
 
 .dropdown-item:hover {
@@ -171,7 +191,8 @@ body {
     border-bottom: 1px solid rgba(0,0,0,0.05);
     padding: 1.25rem 1.5rem;
     font-weight: 600;
-    background: linear-gradient(135deg, rgba(57, 90, 127, 0.1) 0%, rgba(110, 159, 193, 0.1) 100%);
+    background: var(--gradient-primary) !important;
+    color: white !important;
 }
 
 .card-body {
@@ -425,7 +446,13 @@ body {
     color: white;
     padding: 5rem 0;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    z-index: 100 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0;
+    isolation: isolate;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .hero-section::before {
@@ -437,6 +464,8 @@ body {
     height: 200%;
     background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
     animation: pulse 15s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
 }
 
 @keyframes pulse {
@@ -449,12 +478,38 @@ body {
     font-size: 3.5rem;
     text-shadow: 0 4px 20px rgba(0,0,0,0.2);
     margin-bottom: 1rem;
+    color: white !important;
+    position: relative;
+    z-index: 200 !important;
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Override global h1 gradient text effect */
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: white !important;
+    background-clip: unset !important;
 }
 
 .hero-section .lead {
     font-size: 1.35rem;
     font-weight: 400;
     opacity: 0.95;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section .col-12 {
+    position: relative;
+    z-index: 11;
+}
+
+.hero-section h1,
+.hero-section .lead,
+.hero-section form,
+.hero-section .row {
+    position: relative;
+    z-index: 12;
 }
 
 /* Book Cards */
@@ -754,12 +809,29 @@ html {
 /* Container Enhancements */
 .container, .container-fluid {
     position: relative;
+    z-index: 1;
+}
+
+.hero-container {
+    z-index: 100 !important;
+    position: relative !important;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 /* Main Content Area */
 main {
     min-height: calc(100vh - 200px);
     padding: 2rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Override main z-index when it contains hero section */
+main .hero-container {
+    z-index: 100 !important;
+    position: relative !important;
+    transform: translateZ(0);
 }
 
 /* Enhanced Dropdowns */

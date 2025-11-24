@@ -4,11 +4,11 @@
 {% block title %}Home - Readify Library Management System{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Hero Section -->
-    <div class="row hero-section text-white py-5">
-        <div class="col-12 text-center position-relative">
-            <h1 class="display-4 fw-bold mb-3">
+<!-- Hero Section -->
+<div class="container-fluid px-0 hero-container" style="position: relative; z-index: 100 !important; transform: translateZ(0);">
+    <div class="row hero-section text-white py-5 mx-0">
+        <div class="col-12 text-center position-relative" style="z-index: 101 !important; transform: translateZ(0);">
+            <h1 class="display-4 fw-bold mb-3 text-white" style="position: relative; z-index: 102 !important; transform: translateZ(0); color: white !important;">
                 <i class="fas fa-book-open me-3"></i>Welcome to Readify
             </h1>
             <p class="lead mb-4">Your Digital Gateway to Knowledge and Learning</p>
@@ -26,7 +26,10 @@
             </div>
         </div>
     </div>
+</div>
 
+<!-- Main Content -->
+<div class="container-fluid">
     <!-- Statistics Cards (Staff Only) -->
     {% if user.is_staff %}
     <div class="container mt-5">
@@ -109,7 +112,7 @@
                 <div class="col-12 text-center">
                     <div class="bg-light p-5 rounded">
                         <h3 class="mb-3">Ready to Start Your Reading Journey?</h3>
-                        <p class="lead mb-4">Join our library community and gain access to thousands of books.</p>
+                        <p class="lead mb-4">Join our library community and gain access to our collection of books.</p>
                         <a href="{% url 'library:register' %}" class="btn btn-primary btn-lg me-3">
                             <i class="fas fa-user-plus me-2"></i>Create Account
                         </a>

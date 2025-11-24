@@ -89,13 +89,13 @@ def profile_view(request):
         return redirect('library:home')
 
     if request.method == 'POST':
-        form = BorrowerForm(request.POST, instance=borrower)
+        form = BorrowerForm(request.POST, instance=borrower, allow_staff_edit=False)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('library:profile')
     else:
-        form = BorrowerForm(instance=borrower)
+        form = BorrowerForm(instance=borrower, allow_staff_edit=False)
     
     return render(request, 'library/profile.html', {'form': form, 'borrower': borrower})
 

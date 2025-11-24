@@ -105,11 +105,21 @@ class BorrowerForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        allow_staff_edit = kwargs.pop('allow_staff_edit', True)
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.user:
             self.fields['email'].initial = self.instance.user.email
             self.fields['first_name'].initial = self.instance.user.first_name
             self.fields['last_name'].initial = self.instance.user.last_name
+
+        if not allow_staff_edit:
+            for field_name in ('library_id', 'max_books_allowed'):
+                field = self.fields.get(field_name)
+                if not field:
+                    continue
+                field.disabled = True
+                field.required = False
+                field.widget.attrs['readonly'] = True
 
     def save(self, commit=True):
         borrower = super().save(commit=False)
