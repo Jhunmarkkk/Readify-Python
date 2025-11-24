@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Reservations - Readify Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-bookmark me-2"></i>My Reservations</h2>
+            <p class="text-muted">Manage your book reservations</p>
+        </div>
+    </div>
+
+    <!-- Reservations List -->
+    {% if reservations %}
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Book</th>
+                                <th>Request Date</th>
+                                <th>Expiry Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in reservations %}
+                                <tr class="{% if reservation.is_expired %}table-warning{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if reservation.book.cover_image %}
+                                                <img src="{{ reservation.book.cover_image.url }}" 
+                                                     alt="{{ reservation.book.title }}" 
+                                                     class="me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="me-3 bg-light d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 70px;">
+                                                    <i class="fas fa-book text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ reservation.book.title }}</h6>
+                                                <small class="text-muted">
+                                                    {% for author in reservation.book.authors.all %}
+                                                        {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </small>
+                                                <br>
+                                                <small class="text-muted">ISBN: {{ reservation.book.isbn }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ reservation.request_date|date:"M d, Y" }}</td>
+                                    <td>{{ reservation.expiry_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if reservation.status == 'pending' %}
+                                            {% if reservation.is_expired %}
+                                                <span class="badge bg-danger">Expired</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
+                                        {% elif reservation.status == 'fulfilled' %}
+                                            <span class="badge bg-success">Fulfilled</span>
+                                        {% elif reservation.status == 'cancelled' %}
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                        {% else %}
+                                            <span class="badge bg-info">{{ reservation.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'library:book_detail' reservation.book.id %}" 
+                                               class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if reservation.status == 'pending' %}
+                                                <a href="{% url 'library:cancel_reservation' reservation.id %}" 
+                                                   class="btn btn-outline-danger"
+                                                   onclick="return confirm('Are you sure you want to cancel this reservation?')">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-bookmark fa-4x text-muted mb-3"></i>
+                    <h4>No Reservations</h4>
+                    <p class="text-muted">You don't have any book reservations at the moment.</p>
+                    <a href="{% url 'library:book_list' %}" class="btn btn-primary">
+                        <i class="fas fa-books me-2"></i>Browse Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="fas fa-bolt me-2"></i>Quick Actions</h4>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{% url 'library:book_list' %}" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="fas fa-books me-2"></i>Browse Books
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'library:my_borrowings' %}" class="btn btn-outline-success btn-lg w-100">
+                        <i class="fas fa-book-reader me-2"></i>My Borrowings
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'library:search' %}" class="btn btn-outline-info btn-lg w-100">
+                        <i class="fas fa-search me-2"></i>Search Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

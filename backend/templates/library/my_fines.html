@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Fines - Readify Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-dollar-sign me-2"></i>My Fines</h2>
+            <p class="text-muted">View and manage your library fines</p>
+        </div>
+    </div>
+
+    <!-- Fine Summary -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Total Fines</h5>
+                    <h3 class="text-danger">${{ total_fines|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">Pending Fines</h5>
+                    <h3 class="text-warning">${{ pending_fines|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fines List -->
+    {% if fines %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Fine Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Book</th>
+                                        <th>Borrow Date</th>
+                                        <th>Due Date</th>
+                                        <th>Return Date</th>
+                                        <th>Fine Amount</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fine in fines %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if fine.borrowing.book.cover_image %}
+                                                        <img src="{{ fine.borrowing.book.cover_image.url }}" 
+                                                             alt="{{ fine.borrowing.book.title }}" 
+                                                             class="me-3" style="width: 40px; height: 60px; object-fit: cover;">
+                                                    {% else %}
+                                                        <div class="me-3 bg-light d-flex align-items-center justify-content-center" 
+                                                             style="width: 40px; height: 60px;">
+                                                            <i class="fas fa-book text-muted"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                    <div>
+                                                        <h6 class="mb-0">{{ fine.borrowing.book.title }}</h6>
+                                                        <small class="text-muted">
+                                                            {% for author in fine.borrowing.book.authors.all %}
+                                                                {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                                                            {% endfor %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ fine.borrowing.borrow_date|date:"M d, Y" }}</td>
+                                            <td>{{ fine.borrowing.due_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if fine.borrowing.return_date %}
+                                                    {{ fine.borrowing.return_date|date:"M d, Y" }}
+                                                {% else %}
+                                                    <span class="text-muted">Not returned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-danger">${{ fine.amount|floatformat:2 }}</span>
+                                            </td>
+                                            <td>
+                                                {% if fine.status == 'pending' %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% elif fine.status == 'paid' %}
+                                                    <span class="badge bg-success">Paid</span>
+                                                {% elif fine.status == 'waived' %}
+                                                    <span class="badge bg-info">Waived</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ fine.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ fine.created_at|date:"M d, Y" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        {% if pending_fines > 0 %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6>How to Pay Your Fines:</h6>
+                                    <ul>
+                                        <li>Visit the library circulation desk during operating hours</li>
+                                        <li>Bring your library card or ID</li>
+                                        <li>Pay in cash, check, or card</li>
+                                        <li>Get a receipt for your payment</li>
+                                    </ul>
+                                    <p class="text-muted small">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Online payment options may be available. Please contact the library for more information.
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <h5 class="text-danger">Amount Due</h5>
+                                    <h2 class="text-danger">${{ pending_fines|floatformat:2 }}</h2>
+                                    <small class="text-muted">Pending fines only</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4>No Fines</h4>
+                    <p class="text-muted">You don't have any fines at the moment. Keep up the good work!</p>
+                    <a href="{% url 'library:book_list' %}" class="btn btn-primary">
+                        <i class="fas fa-books me-2"></i>Browse Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="fas fa-bolt me-2"></i>Quick Actions</h4>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{% url 'library:my_borrowings' %}" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="fas fa-book-reader me-2"></i>My Borrowings
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'library:my_reservations' %}" class="btn btn-outline-info btn-lg w-100">
+                        <i class="fas fa-bookmark me-2"></i>My Reservations
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'library:book_list' %}" class="btn btn-outline-success btn-lg w-100">
+                        <i class="fas fa-books me-2"></i>Browse Books
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

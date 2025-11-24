@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Borrow Book - Readify Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-book-reader me-2"></i>Borrow Book</h2>
+            <p class="text-muted">Borrow this book from the library</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-md-4">
+            <div class="card">
+                {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}" 
+                         style="height: 300px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 300px;">
+                        <i class="fas fa-book fa-4x text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">
+                        <strong>Author{{ book.authors.count|pluralize }}:</strong><br>
+                        {% for author in book.authors.all %}
+                            {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">
+                        <strong>ISBN:</strong> {{ book.isbn }}<br>
+                        <strong>Publisher:</strong> {{ book.publisher }}<br>
+                        <strong>Year:</strong> {{ book.publication_year }}<br>
+                        <strong>Pages:</strong> {{ book.pages }}
+                    </p>
+                    <div class="mb-3">
+                        <span class="badge bg-success fs-6">
+                            <i class="fas fa-check me-1"></i>Available
+                        </span>
+                        <span class="badge bg-info ms-1">
+                            {{ book.available_copies }}/{{ book.total_copies }} copies
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Borrowing Form -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Borrowing Information</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Borrower Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary">Your Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ borrower.full_name }}</p>
+                                    <p><strong>Library ID:</strong> {{ borrower.library_id }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Current Borrowings:</strong> {{ borrower.current_borrowed_books }}/{{ borrower.max_books_allowed }}</p>
+                                    <p><strong>Status:</strong> 
+                                        {% if borrower.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Borrowing Terms -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary">Borrowing Terms</h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Borrowing Period:</strong> 14 days from the date of borrowing<br>
+                                <strong>Due Date:</strong> <span id="due-date"></span><br>
+                                <strong>Fine Rate:</strong> $5.00 per day for overdue books (maximum 30 days)<br>
+                                <strong>Renewal:</strong> Books can be renewed if not reserved by another borrower
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Borrowing Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes (Optional)</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger small">{{ form.notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'library:book_detail' book.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Book Details
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-book-reader me-2"></i>Borrow Book
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Important Information -->
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Important Information</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>You are responsible for the book until it is returned</li>
+                        <li>Return the book on or before the due date to avoid fines</li>
+                        <li>Contact the library immediately if the book is lost or damaged</li>
+                        <li>You can renew books online or by visiting the library</li>
+                        <li>Keep your library card and borrower information updated</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Calculate and display due date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const dueDate = new Date(today.getTime() + (14 * 24 * 60 * 60 * 1000)); // 14 days from now
+    
+    const dueDateElement = document.getElementById('due-date');
+    dueDateElement.textContent = dueDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    // Add Bootstrap classes to form fields
+    const formFields = document.querySelectorAll('input, textarea, select');
+    formFields.forEach(field => {
+        if (field.type !== 'checkbox') {
+            field.classList.add('form-control');
+        } else {
+            field.classList.add('form-check-input');
+        }
+    });
+});
+</script>
+{% endblock %}

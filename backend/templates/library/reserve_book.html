@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reserve Book - Readify Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-bookmark me-2"></i>Reserve Book</h2>
+            <p class="text-muted">Reserve this book when it becomes available</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-md-4">
+            <div class="card">
+                {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}" 
+                         style="height: 300px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 300px;">
+                        <i class="fas fa-book fa-4x text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">
+                        <strong>Author{{ book.authors.count|pluralize }}:</strong><br>
+                        {% for author in book.authors.all %}
+                            {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">
+                        <strong>ISBN:</strong> {{ book.isbn }}<br>
+                        <strong>Publisher:</strong> {{ book.publisher }}<br>
+                        <strong>Year:</strong> {{ book.publication_year }}<br>
+                        <strong>Pages:</strong> {{ book.pages }}
+                    </p>
+                    <div class="mb-3">
+                        {% if book.is_available %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-check me-1"></i>Available
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning fs-6">
+                                <i class="fas fa-clock me-1"></i>Currently Borrowed
+                            </span>
+                        {% endif %}
+                        <span class="badge bg-info ms-1">
+                            {{ book.available_copies }}/{{ book.total_copies }} copies
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservation Form -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Reservation Information</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Borrower Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary">Your Information</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ borrower.full_name }}</p>
+                                    <p><strong>Library ID:</strong> {{ borrower.library_id }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Current Borrowings:</strong> {{ borrower.current_borrowed_books }}/{{ borrower.max_books_allowed }}</p>
+                                    <p><strong>Status:</strong> 
+                                        {% if borrower.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservation Terms -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary">Reservation Terms</h6>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Reservation Period:</strong> 7 days from request date<br>
+                                <strong>Expiry Date:</strong> <span id="expiry-date"></span><br>
+                                <strong>Notification:</strong> You will be notified when the book becomes available<br>
+                                <strong>Priority:</strong> First come, first served basis<br>
+                                <strong>Auto-cancellation:</strong> Reservation expires if not claimed within 7 days
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservation Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Reservation Notes (Optional)</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger small">{{ form.notes.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Add any special notes about your reservation request.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'library:book_detail' book.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Book Details
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-bookmark me-2"></i>Reserve Book
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reservation Guidelines -->
+            <div class="card mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Reservation Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>You can only have one reservation per book at a time</li>
+                        <li>Reservations expire after 7 days if not claimed</li>
+                        <li>You will be notified when the book becomes available</li>
+                        <li>You have 3 days to pick up the book once notified</li>
+                        <li>Reservations are processed in order of request</li>
+                        <li>You can cancel your reservation at any time</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- What Happens Next -->
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="fas fa-book me-2"></i>What Happens Next?</h6>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Your reservation request will be processed</li>
+                        <li>You will be added to the waiting list for this book</li>
+                        <li>When the book becomes available, you'll be notified</li>
+                        <li>You can then borrow the book within 3 days</li>
+                        <li>The book will be held for you at the circulation desk</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Calculate and display expiry date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const expiryDate = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days from now
+    
+    const expiryDateElement = document.getElementById('expiry-date');
+    expiryDateElement.textContent = expiryDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    // Add Bootstrap classes to form fields
+    const formFields = document.querySelectorAll('input, textarea, select');
+    formFields.forEach(field => {
+        if (field.type !== 'checkbox') {
+            field.classList.add('form-control');
+        } else {
+            field.classList.add('form-check-input');
+        }
+    });
+});
+</script>
+{% endblock %}

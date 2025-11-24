@@ -1,0 +1,420 @@
+{% extends 'library/admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Readify Library{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #395A7F;
+    }
+    .form-section h5 {
+        color: #395A7F;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .form-section-icon {
+        margin-right: 0.5rem;
+    }
+    .cover-image-preview {
+        max-width: 200px;
+        max-height: 300px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-top: 1rem;
+    }
+    .image-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+    .image-upload-area:hover {
+        border-color: #395A7F;
+        background: #f8f9fa;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    .authors-checkbox-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 1rem;
+        background: #fff;
+    }
+    .authors-checkbox-list .form-check {
+        padding: 0.5rem;
+        margin-bottom: 0.25rem;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    .authors-checkbox-list .form-check:hover {
+        background: #f8f9fa;
+    }
+    .authors-checkbox-list .form-check-label {
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+    .authors-checkbox-list input[type="checkbox"] {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <p class="text-muted mb-0">{% if object %}Edit book information{% else %}Add a new book to the library{% endif %}</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="bookForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                {{ form.non_field_errors }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Left Column - Main Form -->
+            <div class="col-lg-8">
+                <!-- Basic Information Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-section">
+                            <!-- Title -->
+                            <div class="mb-4">
+                                <label for="{{ form.title.id_for_label }}" class="form-label required-field">
+                                    <i class="fas fa-heading me-1"></i>{{ form.title.label }}
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.help_text %}
+                                    <div class="help-text">{{ form.title.help_text }}</div>
+                                {% endif %}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- ISBN -->
+                            <div class="mb-4">
+                                <label for="{{ form.isbn.id_for_label }}" class="form-label required-field">
+                                    <i class="fas fa-barcode me-1"></i>{{ form.isbn.label }}
+                                </label>
+                                {{ form.isbn }}
+                                {% if form.isbn.help_text %}
+                                    <div class="help-text">{{ form.isbn.help_text }}</div>
+                                {% endif %}
+                                {% if form.isbn.errors %}
+                                    <div class="text-danger small mt-1">{{ form.isbn.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Category -->
+                            <div class="mb-4">
+                                <label for="{{ form.category.id_for_label }}" class="form-label required-field">
+                                    <i class="fas fa-tags me-1"></i>{{ form.category.label }}
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.help_text %}
+                                    <div class="help-text">{{ form.category.help_text }}</div>
+                                {% endif %}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Authors -->
+                            <div class="mb-4">
+                                <label class="form-label required-field">
+                                    <i class="fas fa-user-pen me-1"></i>{{ form.authors.label }}
+                                </label>
+                                <div class="authors-checkbox-list">
+                                    {% for checkbox in form.authors %}
+                                        <div class="form-check">
+                                            {{ checkbox.tag }}
+                                            <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                {{ checkbox.choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.authors.help_text %}
+                                    <div class="help-text mt-2">{{ form.authors.help_text }}</div>
+                                {% endif %}
+                                {% if form.authors.errors %}
+                                    <div class="text-danger small mt-1">{{ form.authors.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Book Cover Image Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-image me-2"></i>Book Cover Image</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-section">
+                            {% if object and object.cover_image %}
+                                <div class="mb-3">
+                                    <label class="form-label">Current Cover Image</label>
+                                    <div>
+                                        <img src="{{ object.cover_image.url }}" alt="{{ object.title }}" class="cover-image-preview">
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.cover_image.id_for_label }}" class="form-label">
+                                    <i class="fas fa-upload me-1"></i>{{ form.cover_image.label }}
+                                </label>
+                                <div class="image-upload-area">
+                                    {{ form.cover_image }}
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Recommended size: 300x400px or similar aspect ratio. 
+                                            Supported formats: JPG, PNG, GIF
+                                        </small>
+                                    </div>
+                                </div>
+                                {% if form.cover_image.help_text %}
+                                    <div class="help-text mt-2">{{ form.cover_image.help_text }}</div>
+                                {% endif %}
+                                {% if form.cover_image.errors %}
+                                    <div class="text-danger small mt-1">{{ form.cover_image.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Publication Details Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Publication Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-section">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.publisher.id_for_label }}" class="form-label required-field">
+                                        <i class="fas fa-building me-1"></i>{{ form.publisher.label }}
+                                    </label>
+                                    {{ form.publisher }}
+                                    {% if form.publisher.errors %}
+                                        <div class="text-danger small mt-1">{{ form.publisher.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.publication_year.id_for_label }}" class="form-label required-field">
+                                        <i class="fas fa-calendar me-1"></i>{{ form.publication_year.label }}
+                                    </label>
+                                    {{ form.publication_year }}
+                                    {% if form.publication_year.errors %}
+                                        <div class="text-danger small mt-1">{{ form.publication_year.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.pages.id_for_label }}" class="form-label">
+                                        <i class="fas fa-file-alt me-1"></i>{{ form.pages.label }}
+                                    </label>
+                                    {{ form.pages }}
+                                    {% if form.pages.errors %}
+                                        <div class="text-danger small mt-1">{{ form.pages.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.price.id_for_label }}" class="form-label">
+                                        <i class="fas fa-dollar-sign me-1"></i>{{ form.price.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.price }}
+                                    </div>
+                                    {% if form.price.errors %}
+                                        <div class="text-danger small mt-1">{{ form.price.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-align-left me-2"></i>Description</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-section">
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    <i class="fas fa-paragraph me-1"></i>{{ form.description.label }}
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.help_text %}
+                                    <div class="help-text">{{ form.description.help_text }}</div>
+                                {% endif %}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Availability & Actions -->
+            <div class="col-lg-4">
+                <!-- Availability Section -->
+                <div class="card mb-4 shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-box me-2"></i>Availability</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="{{ form.total_copies.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-copy me-1"></i>{{ form.total_copies.label }}
+                            </label>
+                            {{ form.total_copies }}
+                            {% if form.total_copies.help_text %}
+                                <div class="help-text">{{ form.total_copies.help_text }}</div>
+                            {% endif %}
+                            {% if form.total_copies.errors %}
+                                <div class="text-danger small mt-1">{{ form.total_copies.errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% if object %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Available Copies:</strong> {{ object.available_copies }}<br>
+                                <small>This is automatically calculated based on borrowings.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>{% if object %}Update Book{% else %}Add Book{% endif %}
+                            </button>
+                            <a href="{% url 'library:admin_manage' 'books' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            {% if object %}
+                                <a href="{% url 'library:book_detail' object.id %}" class="btn btn-outline-info" target="_blank">
+                                    <i class="fas fa-eye me-2"></i>View Book Page
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Bootstrap classes to all form fields
+    const formFields = document.querySelectorAll('input, select, textarea');
+    formFields.forEach(field => {
+        if (!field.classList.contains('btn') && field.type !== 'checkbox' && field.type !== 'file') {
+            field.classList.add('form-control');
+        }
+        if (field.type === 'file') {
+            field.classList.add('form-control');
+        }
+    });
+
+    // Preview image when file is selected
+    const imageInput = document.querySelector('input[type="file"][name="cover_image"]');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Remove existing preview if any
+                    const existingPreview = document.querySelector('.image-preview-new');
+                    if (existingPreview) {
+                        existingPreview.remove();
+                    }
+                    
+                    // Create new preview
+                    const preview = document.createElement('img');
+                    preview.src = e.target.result;
+                    preview.className = 'cover-image-preview image-preview-new mt-3';
+                    preview.alt = 'Preview';
+                    
+                    // Insert after the file input
+                    const uploadArea = imageInput.closest('.image-upload-area');
+                    if (uploadArea) {
+                        uploadArea.appendChild(preview);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Form validation feedback
+    const form = document.getElementById('bookForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Borrowings - Readify Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-book-reader me-2"></i>My Borrowings</h2>
+            <p class="text-muted">Manage your borrowed books and track due dates</p>
+        </div>
+    </div>
+
+    <!-- Current Borrowings -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="fas fa-clock me-2"></i>Currently Borrowed</h4>
+            
+            {% if current_borrowings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Days Overdue</th>
+                                <th>Fine Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for borrowing in current_borrowings %}
+                                <tr class="{% if borrowing.is_overdue %}table-warning{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if borrowing.book.cover_image %}
+                                                <img src="{{ borrowing.book.cover_image.url }}" 
+                                                     alt="{{ borrowing.book.title }}" 
+                                                     class="me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="me-3 bg-light d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 70px;">
+                                                    <i class="fas fa-book text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ borrowing.book.title }}</h6>
+                                                <small class="text-muted">
+                                                    {% for author in borrowing.book.authors.all %}
+                                                        {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ borrowing.borrow_date|date:"M d, Y" }}</td>
+                                    <td>{{ borrowing.due_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if borrowing.is_overdue %}
+                                            <span class="badge bg-danger">
+                                                {{ borrowing.days_overdue }} day{{ borrowing.days_overdue|pluralize }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success">
+                                                {{ borrowing.days_remaining }} day{{ borrowing.days_remaining|pluralize }} left
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if borrowing.is_overdue %}
+                                            <span class="text-danger fw-bold">${{ borrowing.fine_amount|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">$0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'library:book_detail' borrowing.book.id %}" 
+                                               class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'library:return_book' borrowing.id %}" 
+                                               class="btn btn-outline-success">
+                                                <i class="fas fa-undo"></i> Return
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination for current borrowings -->
+                {% if current_borrowings.has_other_pages %}
+                    <nav aria-label="Current borrowings pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if current_borrowings.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ current_borrowings.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in current_borrowings.paginator.page_range %}
+                                {% if current_borrowings.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > current_borrowings.number|add:'-3' and num < current_borrowings.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if current_borrowings.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ current_borrowings.next_page_number }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+                    <h4>No Current Borrowings</h4>
+                    <p class="text-muted">You don't have any books borrowed at the moment.</p>
+                    <a href="{% url 'library:book_list' %}" class="btn btn-primary">
+                        <i class="fas fa-books me-2"></i>Browse Books
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Past Borrowings -->
+    {% if past_borrowings %}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="fas fa-history me-2"></i>Borrowing History</h4>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Borrow Date</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for borrowing in past_borrowings %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if borrowing.book.cover_image %}
+                                                    <img src="{{ borrowing.book.cover_image.url }}" 
+                                                         alt="{{ borrowing.book.title }}" 
+                                                         class="me-3" style="width: 40px; height: 60px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="me-3 bg-light d-flex align-items-center justify-content-center" 
+                                                         style="width: 40px; height: 60px;">
+                                                        <i class="fas fa-book text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">{{ borrowing.book.title }}</h6>
+                                                    <small class="text-muted">
+                                                        {% for author in borrowing.book.authors.all %}
+                                                            {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ borrowing.borrow_date|date:"M d, Y" }}</td>
+                                        <td>{{ borrowing.return_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Returned
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h4 class="mb-3"><i class="fas fa-bolt me-2"></i>Quick Actions</h4>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{% url 'library:book_list' %}" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="fas fa-books me-2"></i>Browse Books
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'library:my_reservations' %}" class="btn btn-outline-info btn-lg w-100">
+                        <i class="fas fa-bookmark me-2"></i>My Reservations
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'library:my_fines' %}" class="btn btn-outline-warning btn-lg w-100">
+                        <i class="fas fa-dollar-sign me-2"></i>My Fines
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

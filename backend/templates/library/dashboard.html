@@ -1,0 +1,223 @@
+{% extends 'library/admin/base_admin.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Readify Library{% endblock %}
+
+{% block page_title %}Library Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            {% comment %} <p class="text-muted">Overview of library operations and statistics</p> {% endcomment %}
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-book fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-primary">{{ total_books }}</h3>
+                    <p class="card-text">Total Books</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-users fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-success">{{ total_borrowers }}</h3>
+                    <p class="card-text">Active Borrowers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-info mb-3">
+                        <i class="fas fa-book-reader fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-info">{{ active_borrowings }}</h3>
+                    <p class="card-text">Active Borrowings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    </div>
+                    <h3 class="card-title text-warning">{{ overdue_borrowings_count }}</h3>
+                    <p class="card-text">Overdue Books</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Overdue Books -->
+    <div class="row mb-5">
+        <!-- Recent Activity -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_activity %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Borrower</th>
+                                        <th>Book</th>
+                                        <th>Action</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for borrowing in recent_activity %}
+                                        <tr>
+                                            <td>{{ borrowing.borrower.full_name }}</td>
+                                            <td>{{ borrowing.book.title }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">Borrowed</span>
+                                            </td>
+                                            <td>{{ borrowing.borrow_date|date:"M d, Y H:i" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No recent activity</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Books -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Overdue Books</h5>
+                </div>
+                <div class="card-body">
+                    {% if overdue_borrowings %}
+                        {% for borrowing in overdue_borrowings %}
+                            <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                                <div>
+                                    <h6 class="mb-0">{{ borrowing.book.title }}</h6>
+                                    <small class="text-muted">{{ borrowing.borrower.full_name }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-danger">
+                                        {{ borrowing.days_overdue }} days
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        Due: {{ borrowing.due_date|date:"M d" }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No overdue books</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Books and Fine Statistics -->
+    <div class="row mb-5">
+        <!-- Popular Books -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Most Popular Books</h5>
+                </div>
+                <div class="card-body">
+                    {% if popular_books %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Book Title</th>
+                                        <th>Author</th>
+                                        <th>Borrowings</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for book in popular_books %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary">{{ forloop.counter }}</span>
+                                            </td>
+                                            <td>{{ book.title }}</td>
+                                            <td>
+                                                {% for author in book.authors.all %}
+                                                    {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                            <td>{{ book.borrow_count }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if book.is_available %}success{% else %}secondary{% endif %}">
+                                                    {% if book.is_available %}Available{% else %}Unavailable{% endif %}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No borrowing data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Fine Statistics -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Fine Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-danger">${{ total_fines|floatformat:2 }}</h4>
+                            <small class="text-muted">Total Fines</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-warning">${{ pending_fines|floatformat:2 }}</h4>
+                            <small class="text-muted">Pending Fines</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="text-info">{{ recent_borrowings }}</h5>
+                            <small class="text-muted">This Week</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-success">{{ recent_returns }}</h5>
+                            <small class="text-muted">Returns</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

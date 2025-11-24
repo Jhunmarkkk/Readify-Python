@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Return Book - Readify Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-undo me-2"></i>Return Book</h2>
+            <p class="text-muted">Return this borrowed book to the library</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Book Information -->
+        <div class="col-md-4">
+            <div class="card">
+                {% if borrowing.book.cover_image %}
+                    <img src="{{ borrowing.book.cover_image.url }}" class="card-img-top" alt="{{ borrowing.book.title }}" 
+                         style="height: 300px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 300px;">
+                        <i class="fas fa-book fa-4x text-muted"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ borrowing.book.title }}</h5>
+                    <p class="card-text">
+                        <strong>Author{{ borrowing.book.authors.count|pluralize }}:</strong><br>
+                        {% for author in borrowing.book.authors.all %}
+                            {{ author.full_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">
+                        <strong>ISBN:</strong> {{ borrowing.book.isbn }}<br>
+                        <strong>Publisher:</strong> {{ borrowing.book.publisher }}<br>
+                        <strong>Year:</strong> {{ borrowing.book.publication_year }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Return Information -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Return Information</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Borrowing Details -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary">Borrowing Details</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Borrowed Date:</strong> {{ borrowing.borrow_date|date:"M d, Y" }}</p>
+                                    <p><strong>Due Date:</strong> {{ borrowing.due_date|date:"M d, Y" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Borrower:</strong> {{ borrowing.borrower.full_name }}</p>
+                                    <p><strong>Library ID:</strong> {{ borrowing.borrower.library_id }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fine Information -->
+                    {% if fine_amount > 0 %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-warning">Fine Information</h6>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Overdue Fine:</strong> ${{ fine_amount|floatformat:2 }}<br>
+                                    <small class="text-muted">
+                                        This book is overdue. The fine will be added to your account.
+                                        Please visit the library circulation desk to pay the fine.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>No Fines:</strong> This book is being returned on time.
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Return Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Return Notes (Optional)</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger small">{{ form.notes.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Add any notes about the book's condition or return circumstances.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'library:my_borrowings' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to My Borrowings
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-undo me-2"></i>Return Book
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Return Guidelines -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Return Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Books can be returned at any time during library hours</li>
+                        <li>Use the book drop box if the library is closed</li>
+                        <li>Ensure the book is in good condition when returning</li>
+                        <li>Report any damage or loss immediately</li>
+                        {% if fine_amount > 0 %}
+                            <li class="text-warning"><strong>Remember to pay your fine of ${{ fine_amount|floatformat:2 }} at the circulation desk</strong></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Book Status After Return -->
+            <div class="card mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-book me-2"></i>After Return</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">Once returned, this book will:</p>
+                    <ul class="mb-0">
+                        <li>Become available for other borrowers</li>
+                        <li>Appear in your borrowing history</li>
+                        <li>Free up one of your borrowing slots</li>
+                        <li>Be removed from your current borrowings list</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add Bootstrap classes to form fields
+document.addEventListener('DOMContentLoaded', function() {
+    const formFields = document.querySelectorAll('input, textarea, select');
+    formFields.forEach(field => {
+        if (field.type !== 'checkbox') {
+            field.classList.add('form-control');
+        } else {
+            field.classList.add('form-check-input');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - Readify Library{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: linear-gradient(180deg, #395A7F 0%, #6E9FC1 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        .admin-sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-sidebar-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        .admin-sidebar-menu {
+            padding: 1rem 0;
+        }
+        .admin-sidebar-menu .menu-item {
+            display: block;
+            padding: 0.85rem 1.5rem;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 3px solid transparent;
+            font-weight: 500;
+            position: relative;
+        }
+        .admin-sidebar-menu .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: rgba(255,255,255,0.2);
+            transition: width 0.3s ease;
+        }
+        .admin-sidebar-menu .menu-item:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border-left-color: white;
+            transform: translateX(5px);
+        }
+        .admin-sidebar-menu .menu-item:hover::before {
+            width: 100%;
+        }
+        .admin-sidebar-menu .menu-item.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-left-color: white;
+            font-weight: 600;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+        }
+        .admin-sidebar-menu .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+        .admin-sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        .admin-navbar {
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.25rem 2rem;
+            margin-bottom: 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .admin-main-content {
+            padding: 2rem;
+        }
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            .admin-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Admin Sidebar -->
+    <div class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <h4><i class="fas fa-book-open me-2"></i>Readify Admin</h4>
+            <small class="text-white-50">Library Management</small>
+        </div>
+        
+        <div class="admin-sidebar-menu">
+            <a href="{% url 'library:dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>Dashboard
+            </a>
+            
+            <div class="px-3 py-2 text-uppercase small text-white-50" style="font-size: 0.7rem; letter-spacing: 1px;">
+                Management
+            </div>
+            
+            <a href="{% url 'library:admin_manage' 'books' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'books' in request.path %}active{% endif %}">
+                <i class="fas fa-book"></i>Books
+            </a>
+            <a href="{% url 'library:admin_manage' 'authors' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'authors' in request.path %}active{% endif %}">
+                <i class="fas fa-user-pen"></i>Authors
+            </a>
+            <a href="{% url 'library:admin_manage' 'categories' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'categories' in request.path %}active{% endif %}">
+                <i class="fas fa-tags"></i>Categories
+            </a>
+            <a href="{% url 'library:admin_manage' 'borrowers' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'borrowers' in request.path %}active{% endif %}">
+                <i class="fas fa-users"></i>Borrowers
+            </a>
+            <a href="{% url 'library:admin_manage' 'borrowings' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'borrowings' in request.path %}active{% endif %}">
+                <i class="fas fa-book-reader"></i>Borrowings
+            </a>
+            <a href="{% url 'library:admin_manage' 'fines' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'fines' in request.path %}active{% endif %}">
+                <i class="fas fa-dollar-sign"></i>Fines
+            </a>
+            <a href="{% url 'library:admin_manage' 'reservations' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'reservations' in request.path %}active{% endif %}">
+                <i class="fas fa-bookmark"></i>Reservations
+            </a>
+            <a href="{% url 'library:admin_manage' 'users' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_manage' and 'users' in request.path %}active{% endif %}">
+                <i class="fas fa-user"></i>Users
+            </a>
+        </div>
+        
+        <div class="admin-sidebar-footer">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-user-circle me-2"></i>
+                <div>
+                    <div class="small fw-bold">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="small text-white-50">Administrator</div>
+                </div>
+            </div>
+            <a href="{% url 'library:home' %}" class="btn btn-sm btn-outline-light w-100 mb-2">
+                <i class="fas fa-home me-1"></i>View Site
+            </a>
+            <a href="{% url 'library:logout' %}" class="btn btn-sm btn-outline-light w-100">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Admin Content Area -->
+    <div class="admin-content">
+        <!-- Top Navbar -->
+        <nav class="admin-navbar">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-link d-md-none" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 d-inline-block ms-2">{% block page_title %}Admin Dashboard{% endblock %}</h5>
+                </div>
+                <div>
+                    <a href="{% url 'library:home' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-home me-1"></i>Public Site
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="px-4 pt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {% if message.tags == 'error' %}
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% elif message.tags == 'success' %}
+                            <i class="fas fa-check-circle me-2"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <div class="admin-main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <script>
+        // Mobile sidebar toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.querySelector('.admin-sidebar').classList.toggle('show');
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

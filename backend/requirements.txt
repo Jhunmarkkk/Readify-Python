@@ -1,0 +1,35 @@
+# Django and Core Dependencies
+Django>=4.2.0,<5.0.0
+Pillow>=10.0.0
+python-dateutil>=2.8.2
+
+# Database (SQLite is included with Python)
+# For production, you might want to use PostgreSQL:
+# psycopg2-binary>=2.9.5
+
+# Development Dependencies
+django-debug-toolbar>=4.1.0
+django-extensions>=3.2.0
+
+# Production Dependencies
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+
+# Optional: For enhanced functionality
+django-crispy-forms>=2.0
+crispy-bootstrap5>=0.7
+django-filter>=23.2
+django-import-export>=3.2.0
+
+# Security
+django-cors-headers>=4.3.0
+
+# Testing
+pytest>=7.4.0
+pytest-django>=4.5.0
+factory-boy>=3.3.0
+
+# Code Quality
+flake8>=6.0.0
+black>=23.7.0
+isort>=5.12.0
