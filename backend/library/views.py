@@ -631,13 +631,11 @@ def admin_add(request, model_name):
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
             bio = request.POST.get('bio', '')
-            birth_date = request.POST.get('birth_date') or None
             if first_name and last_name:
                 Author.objects.create(
                     first_name=first_name,
                     last_name=last_name,
-                    bio=bio,
-                    birth_date=birth_date
+                    bio=bio
                 )
                 messages.success(request, 'Author added successfully!')
                 return redirect('library:admin_manage', model_name=model_name)
@@ -709,8 +707,6 @@ def admin_edit(request, model_name, pk):
             obj.first_name = request.POST.get('first_name')
             obj.last_name = request.POST.get('last_name')
             obj.bio = request.POST.get('bio', '')
-            birth_date = request.POST.get('birth_date') or None
-            obj.birth_date = birth_date
             obj.save()
             messages.success(request, 'Author updated successfully!')
             return redirect('library:admin_manage', model_name=model_name)

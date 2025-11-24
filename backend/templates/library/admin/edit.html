@@ -67,10 +67,6 @@
                                     <label for="bio" class="form-label">Biography</label>
                                     <textarea class="form-control" id="bio" name="bio" rows="3">{{ object.bio }}</textarea>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="birth_date" class="form-label">Birth Date</label>
-                                    <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ object.birth_date|date:'Y-m-d' }}">
-                                </div>
                             {% elif model_name == 'categories' %}
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Category Name <span class="text-danger">*</span></label>

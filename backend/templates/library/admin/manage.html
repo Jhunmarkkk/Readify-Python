@@ -82,7 +82,6 @@
                                             <th>Actions</th>
                                         {% elif model_name == 'authors' %}
                                             <th>Name</th>
-                                            <th>Birth Date</th>
                                             <th>Books</th>
                                             <th>Actions</th>
                                         {% elif model_name == 'categories' %}
@@ -167,7 +166,6 @@
                                                 </td>
                                             {% elif model_name == 'authors' %}
                                                 <td><strong>{{ item.full_name }}</strong></td>
-                                                <td>{{ item.birth_date|default:"-" }}</td>
                                                 <td><span class="badge bg-primary">{{ item.books.count }}</span></td>
                                                 <td>
                                                     <a href="{% url 'library:admin_edit' model_name item.id %}" class="btn btn-sm btn-outline-primary">

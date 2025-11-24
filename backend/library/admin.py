@@ -23,9 +23,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'birth_date', 'book_count', 'created_at']
+    list_display = ['full_name', 'book_count', 'created_at']
     search_fields = ['first_name', 'last_name']
-    list_filter = ['birth_date', 'created_at']
+    list_filter = ['created_at']
     ordering = ['last_name', 'first_name']
 
     def book_count(self, obj):

@@ -290,17 +290,10 @@ class AuthorForm(forms.ModelForm):
     
     class Meta:
         model = Author
-        fields = ['first_name', 'last_name', 'bio', 'birth_date']
+        fields = ['first_name', 'last_name', 'bio']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
-            'birth_date': forms.DateInput(attrs={'type': 'date'}),
         }
-
-    def clean_birth_date(self):
-        birth_date = self.cleaned_data.get('birth_date')
-        if birth_date and birth_date > timezone.now().date():
-            raise ValidationError("Birth date cannot be in the future.")
-        return birth_date
 
 
 class ContactForm(forms.Form):
