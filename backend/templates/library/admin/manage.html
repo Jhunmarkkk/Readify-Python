@@ -3,7 +3,7 @@
 
 {% block title %}{{ model_title }} Management - Readify Library{% endblock %}
 
-{% block page_title %}{{ model_title }} Management{% endblock %}
+{% block page_title %}Welcome, {{ user.get_full_name|default:user.username }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">

@@ -3,7 +3,7 @@
 
 {% block title %}Delete {{ title }} - Readify Library{% endblock %}
 
-{% block page_title %}Delete {{ title }}{% endblock %}
+{% block page_title %}Welcome, {{ user.get_full_name|default:user.username }}{% endblock %}
 
 {% block content %}
 <div class="container">

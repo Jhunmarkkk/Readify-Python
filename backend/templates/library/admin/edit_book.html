@@ -3,7 +3,7 @@
 
 {% block title %}{{ title }} - Readify Library{% endblock %}
 
-{% block page_title %}{{ title }}{% endblock %}
+{% block page_title %}Welcome, {{ user.get_full_name|default:user.username }}{% endblock %}
 
 {% block extra_css %}
 <style>
